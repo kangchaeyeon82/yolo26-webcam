@@ -16,6 +16,7 @@
 9. [GitHub CLI로 코드 올리기](#9-github-cli로-코드-올리기)
 10. [정리 및 연습 문제](#10-정리-및-연습-문제)
 11. [용어 사전 (비전공자용)](#11-용어-사전-비전공자용)
+12. [외부 도구 · 연결 서비스 정리](#12-외부-도구--연결-서비스-정리)
 
 > 📖 처음 보는 용어가 나오면 [11장 용어 사전](#11-용어-사전-비전공자용)을 먼저 확인하세요.
 
@@ -501,6 +502,57 @@ gh repo edit 아이디/yolo26-webcam --visibility public --accept-visibility-cha
 | **noreply 이메일** | GitHub가 제공하는 **가짜 이메일 주소**입니다. 커밋 기록에 실제 이메일이 노출되지 않게 해 줍니다. *(→ 9장)* |
 | **README.md** | 저장소에 들어가면 가장 먼저 보이는 **설명서 파일**입니다. 지금 읽고 있는 이 문서입니다. |
 | **Markdown** (`.md`) | `#`, `|`, `**` 같은 간단한 기호로 제목·표·굵은 글씨를 표현하는 **문서 작성 형식**입니다. |
+
+---
+
+## 12. 외부 도구 · 연결 서비스 정리
+
+이 프로젝트가 **바깥에 연결되거나 기대는 것**을 한곳에 모았습니다. 다른 PC에서 다시 실행하거나 문제를 찾을 때 이 표부터 확인하세요.
+
+### 12-1. 파이썬 라이브러리
+
+| 도구 | 확인한 버전 | 역할 | 설치 방법 |
+|---|---|---|---|
+| `ultralytics` | 8.4.174 | YOLO26 모델 불러오기·추론·추적 | `python -m pip install -U ultralytics` |
+| `torch` (PyTorch) | 2.14.1 (CPU) | 딥러닝 계산 엔진 | ultralytics와 함께 자동 설치 |
+| `opencv-python` (`cv2`) | 5.0.0 | 웹캠 열기, 화면 표시, 그리기 | ultralytics와 함께 자동 설치 |
+| `numpy` | 2.5.3 | 배열 계산 (추적 궤적 그리기 등) | ultralytics와 함께 자동 설치 |
+| `lap` | 0.5.13 | 추적기(ByteTrack/BoT-SORT)의 매칭 계산 | 첫 추적 실행 시 자동 설치 |
+
+### 12-2. 인터넷으로 연결되는 곳
+
+| 연결 대상 | 언제 | 내용 |
+|---|---|---|
+| **Ultralytics GitHub 릴리스** | `YOLO("yolo26n.pt")`를 처음 실행할 때 | 가중치 파일(`yolo26n.pt`, `yolo26n-seg.pt`)을 내려받습니다. 받은 파일은 폴더에 저장되고 `.gitignore`로 업로드에서 빠집니다. |
+| **PyPI** (파이썬 패키지 저장소) | `pip install` 할 때, 첫 추적 실행 때 | 라이브러리를 내려받습니다. `lap`은 Ultralytics가 자동으로 설치합니다. |
+| **Ultralytics 사용 통계** | 모델을 실행할 때 | 설정값 `sync`가 켜져(`true`) 있으면 익명 사용 통계를 보냅니다. 끄려면 `yolo settings sync=False` |
+| **GitHub** | `git push`, `gh` 명령을 쓸 때 | 코드를 [kangchaeyeon82/yolo26-webcam](https://github.com/kangchaeyeon82/yolo26-webcam) 저장소에 올립니다. |
+
+> 💡 가중치를 한 번 받은 뒤에는 **인터넷 없이도** 탐지·세그멘테이션이 동작합니다. (추적은 `lap`이 설치돼 있어야 합니다.)
+
+### 12-3. 하드웨어
+
+| 장치 | 연결 방식 | 비고 |
+|---|---|---|
+| **웹캠** | OpenCV `VideoCapture` + Windows **DirectShow**(`cv2.CAP_DSHOW`) | 안 열리면 기본 백엔드로 다시 시도합니다. 번호는 `--source`로 바꿉니다. |
+| **GPU** (선택) | PyTorch + CUDA | 현재 환경은 CPU 버전 PyTorch라 CPU로 실행됩니다. |
+
+### 12-4. 개발 도구
+
+| 도구 | 확인한 버전 | 역할 |
+|---|---|---|
+| Git | 2.55.0 | 변경 이력 기록, 커밋·푸시 |
+| GitHub CLI (`gh`) | 2.102.0 | 저장소 만들기. 로그인 정보는 Windows 자격 증명 관리자(keyring)에 저장되고, Git 통신은 HTTPS를 씁니다. |
+| Python | 3.12 | 코드 실행 |
+
+### 12-5. 내 환경 직접 확인하기
+
+```bash
+python -c "import ultralytics, torch, cv2, numpy; print(ultralytics.__version__, torch.__version__, cv2.__version__, numpy.__version__)"
+yolo settings          # Ultralytics 설정 (sync 등)
+git remote -v          # 연결된 GitHub 저장소
+gh auth status         # GitHub 로그인 상태
+```
 
 ---
 
